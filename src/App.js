@@ -14,7 +14,7 @@ const App = () => {
   const [allWaves, setAllWaves] = useState([]);
   console.log("currentAccount: ", currentAccount);
   /* デプロイされたコントラクトのアドレスを保持する変数を作成 */
-  const contractAddress = "0xC71C05DAD3cF44a9771b9d75c950f17c46A9c832";
+  const contractAddress = "0xD701aF7E3588ADd0711f101B971167621604efc1";
   /* コントラクトからすべてのwavesを取得するメソッドを作成 */
   /* ABIの内容を参照する変数を作成 */
   const contractABI = abi.abi;
@@ -145,6 +145,10 @@ const App = () => {
         );
         let count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
+
+        let contractBalance = await provider.getBalance(wavePortalContract.address);
+        console.log("Contract balance:", ethers.utils.formatEther(contractBalance));
+
         /* コントラクトに👋（wave）を書き込む */
         const waveTxn = await wavePortalContract.wave(messageValue, {
           gasLimit: 300000,
@@ -154,6 +158,19 @@ const App = () => {
         console.log("Mined -- ", waveTxn.hash);
         count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
+
+        let contractBalance_post = await provider.getBalance(wavePortalContract.address);
+        /* コントラクトの残高が減っていることを確認 */
+        if (contractBalance_post.lt(contractBalance)) {
+          /* 減っていたら下記を出力 */
+          console.log("User won ETH!");
+        } else {
+          console.log("User didn't win ETH.");
+        }
+        console.log(
+          "Contract balance after wave:",
+          ethers.utils.formatEther(contractBalance_post)
+        );
       } else {
         console.log("Ethereum object doesn't exist!");
       }
